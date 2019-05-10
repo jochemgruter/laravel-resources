@@ -1,3 +1,7 @@
 # Resource viewer for laravel
 
-Project in developemnt. Questions ask jochemgruter@gmail.com
+Makes it easy to list, view, edit through your laravel models. Possibilities to assign filters, actions and forms to your resources. Project is currently in development fase.
+
+## In development
+
+Project in development. Questions or want to contribute, ask jochemgruter@gmail.com
