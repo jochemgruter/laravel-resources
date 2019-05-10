@@ -1,0 +1,30 @@
+{
+  "name": "jochemgruter/laravel-resource-viewer",
+  "description": "Easy navigate through model resources",
+  "keywords": [
+    "laravel", "models", "resources"
+  ],
+  "license": "MIT",
+  "authors":[
+    {
+      "name": "Jochem Gruter",
+      "email": "jochemgruter@gmail.com"
+    }
+  ],
+  "require":{
+    "illuminate/support": "5.6.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Gruter\\ResourceViewer\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "aliases": {
+        "Resource": "Gruter\\ResrouceViewer\\Facades\\Resource",
+        "Field": "Gruter\\ResrouceViewer\\Facades\\Field"
+      }
+    }
+  }
+}
