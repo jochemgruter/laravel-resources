@@ -19,7 +19,7 @@ Route::get(config('resource-viewer.route').'/{resource}/create', 'ResourceContro
 
 Route::get(config('resource-viewer.route').'/{resource}/{id}', 'ResourceController@show')
     ->where('resource', $uris)
-    ->name('resource.show');
+    ->name('resource.show'); //test
 
 Route::get(config('resource-viewer.route').'/{resource}/{id}/edit', 'ResourceController@edit')
     ->where('resource', $uris)
