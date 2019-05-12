@@ -7,7 +7,7 @@
  */
 
 
-$uris = implode('|', \Gruter\ResourceViewer\Facades\Resource::allUris());
+$uris = implode('|', \Gruter\ResourceViewer\Contracts\Resource::allUris());
 
 Route::get(config('resource-viewer.route').'/{resource}', 'ResourceController@index')
     ->where('resource', $uris)

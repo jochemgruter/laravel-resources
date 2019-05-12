@@ -6,7 +6,7 @@
  * Time: 12:22
  */
 
-namespace Gruter\ResourceViewer\Facades;
+namespace Gruter\ResourceViewer\Contracts;
 
 
 use Illuminate\Support\Facades\Facade;

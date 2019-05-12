@@ -9,7 +9,7 @@
 namespace Gruter\ResourceViewer\Fields;
 
 
-use Gruter\ResourceViewer\Facades\Resource;
+use Gruter\ResourceViewer\Contracts\Resource;
 use Gruter\ResourceViewer\Operators\SimpleOperator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;

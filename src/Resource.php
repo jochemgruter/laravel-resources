@@ -61,6 +61,8 @@ abstract class Resource
 
     private $rows;
 
+    private $assignModel;
+
     public $hideActions = false;
 
     public function __construct()
@@ -192,11 +194,15 @@ abstract class Resource
     public function related(Model $model, $foreignKey = null, $ownerKey = null){
         $ownerKey = $ownerKey ?? $model->getKeyName();
 
-        $foreignKey = $foreignKey ?? Str::snake(get_class($model)).'_'.$model->getKeyName();
+        $foreignKey = $foreignKey ?? Str::snake(class_basename($model)).'_'.$model->getKeyName();
 
-        $this->query->where($foreignKey, $model->getAttribute($ownerKey));
+        $this->getQuery()->where($foreignKey, $model->getAttribute($ownerKey));
 
         return $this;
+    }
+
+    public function assignableTo(Model $model){
+
     }
 
     /**

@@ -9,6 +9,7 @@
 namespace Gruter\ResourceViewer;
 
 
+use Gruter\ResourceViewer\Contracts\Listable;
 use Gruter\ResourceViewer\Fields\Boolean;
 use Gruter\ResourceViewer\Fields\Options;
 use Illuminate\Database\Eloquent\Model;
@@ -31,9 +32,13 @@ class FormBuilder
 
     public function __construct(array $fields, $action, $mode = 0)
     {
-        $this->fields = $fields;
+        $this->fields = collect($fields)->reject(function($field){
+            return $field instanceof Listable;
+        })->toArray();
+
         $this->action = $action;
         $this->mode = $mode;
+
         if ($mode == Resource::MODE_CREATE){
             $this->actionButton = 'Create';
         }

@@ -69,8 +69,19 @@ abstract class Field extends Element
         return new static(...$args);
     }
 
+
+    /**
+     * @param $attribute
+     * @param $value
+     * @return \View returns the view of the editable mode of the field.
+     */
     protected abstract function view($attribute, $value);
 
+    /**
+     * @param null $attribute
+     * @param null $value
+     * @return \View Renders the view of the editable mode of the field
+     */
     public function render($attribute = null, $value = null){
         if (is_null($attribute)) $attribute = $this->attribute;
         if (is_null($value)) $value = $this->value;

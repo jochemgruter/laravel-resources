@@ -19,6 +19,9 @@
         <div class="form-horizontal">
 
             @foreach($fields as $field)
+                @if($field instanceof \Gruter\ResourceViewer\Contracts\Listable)
+                    @continue
+                @endif
 
                 <div class="form-group">
                     <div class="col-lg-3">
@@ -39,5 +42,19 @@
 
         </div>
     </div>
+
+    @foreach($fields as $field)
+        @if(!($field instanceof \Gruter\ResourceViewer\Contracts\Listable))
+            @continue
+        @endif
+
+
+        <h2>{{$field->label()}}</h2>
+
+        <div class="the-box">
+            {!! $field->display($model) !!}
+        </div>
+
+    @endforeach
 
 @endsection

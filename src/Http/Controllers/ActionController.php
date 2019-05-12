@@ -10,7 +10,7 @@ namespace Gruter\ResourceViewer\Http\Controllers;
 
 
 use Gruter\ResourceViewer\Actions\Action;
-use Gruter\ResourceViewer\Facades\Resource;
+use Gruter\ResourceViewer\Contracts\Resource;
 use Gruter\ResourceViewer\Fields\Boolean;
 use Gruter\ResourceViewer\FormBuilder;
 use Illuminate\Http\Request;

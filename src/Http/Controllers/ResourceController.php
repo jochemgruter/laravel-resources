@@ -2,7 +2,7 @@
 
 namespace Gruter\ResourceViewer\Http\Controllers;
 
-use Gruter\ResourceViewer\Facades\Resource;
+use Gruter\ResourceViewer\Contracts\Resource;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Session;
