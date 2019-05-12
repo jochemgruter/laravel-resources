@@ -201,6 +201,30 @@ abstract class Resource
         return $this;
     }
 
+    public function relatedToPivot(Model $model, $table, $foreignPivotKey, $relatedPivotKey, $parentKey, $relatedKey,
+                                   array $fields = null, array $relatedFields = null)
+    {
+
+        if ($fields != null)
+            $this->fields = $fields;
+
+        $query = $this->getQuery();
+
+        $relatedTable = $this->newModel()->getTable();
+        $query->addSelect($relatedTable.'.'.$relatedKey);
+
+        $query->join($table, $table.'.'.$relatedPivotKey, '=', $relatedTable.'.'.$relatedKey);
+
+        $query->where($table.'.'.$foreignPivotKey, $model->getAttributes($parentKey));
+
+        return $this;
+
+        // SELECT * FROM brands JOIN brand_customer ON brand_customer.brand_id = brands.id WHERE brand_customers.customer_id = ?
+        //                                                            relatedPivotKey                           foreignPivotKey
+
+        // SELECT * FROM products JOIN product_composed ON product_composed.product_id = products.id
+    }
+
     public function assignableTo(Model $model){
 
     }
@@ -349,67 +373,73 @@ abstract class Resource
         return $this->actions;
     }
 
-    public function getQuery(){
-        if ($this->query == null){
-            $request = \Illuminate\Support\Facades\Request::instance();
+    public function newQuery(){
+        $request = \Illuminate\Support\Facades\Request::instance();
 
-            $modelInstance = new static::$model;
-            $this->query = (static::$model)::query();
-            $this->query->with($this->with);
+        $modelInstance = new static::$model;
+        $query = (static::$model)::query();
+        $query->with($this->with);
 
-            foreach($this->getFields('showOnIndex') as $field){
-                $this->query->addSelect($modelInstance->getTable().'.'.$field->attribute());
-            }
-
-            if ($request->has('sort_'.static::name())){
-                $direction = $request->get('sort_'.static::name().'_direction', 'asc');
-                $this->query->orderBy($request->get('sort_'.static::name()), $direction);
-            }
-
-            if ($request->has('search_'.static::name())){
-                $this->query->where(function($query) use ($modelInstance, $request){
-                    $fields = $this->getFields('searchable');
-                    $value = $request->get('search_' . static::name());
-
-                    foreach($fields as $field){
-                        if ($field instanceof BelongsTo){
-                            $model = $field->getRelatedModelInstance();
-
-                            $this->query->leftJoin($model->getTable(), $field->attribute(), '=', $model->getTable().'.'.$model->getKeyName());
-                            $query->orWhere($model->getTable().'.'.$field->getForeignTitle(), 'like', '%'.$value.'%');
-                        }else {
-                            $query->orWhere($modelInstance->getTable().'.'.$field->attribute(), 'like', '%' . $value . '%');
-                        }
-                    }
-                });
-            }
-            foreach($this->getFilters() as $filter){
-                if ($filter->value != null)
-                    $filter->apply($this->query, $filter->value);
-            }
-
-            foreach($this->getFields('searchableAdvanced') as $field){
-                $field->advancedSearchValue = $request->get(static::name().'_s_'.$field->attribute());
-                $field->advancedSearchOperator = $request->get(static::name().'_o_'.$field->attribute());
-
-                if ($field->advancedSearchValue != null){
-
-                    if ($field instanceof Boolean || $field instanceof Options)
-                        if ($field->advancedSearchValue == -1){
-                            $field->advancedSearchValue = null;
-                            continue;
-                        }
-
-                    if ($field->advancedSearchOperator)
-                        $operator = $field->advancedSearchOperators()[$field->advancedSearchOperator - 1];
-                    else
-                        $operator = new SimpleOperator('=');
-
-                    $operator->apply($this->query, $modelInstance->getTable().'.'.$field->attribute(), $field->advancedSearchValue);
-                }
-            }
-            $this->buildIndexQuery($this->query);
+        foreach($this->getFields('showOnIndex') as $field){
+            $table = $field->table ?? $modelInstance->getTable();
+            $query->addSelect($table.'.'.$field->attribute());
         }
+
+        if ($request->has('sort_'.static::name())){
+            $direction = $request->get('sort_'.static::name().'_direction', 'asc');
+            $query->orderBy($request->get('sort_'.static::name()), $direction);
+        }
+
+        if ($request->has('search_'.static::name())){
+            $query->where(function($query) use ($modelInstance, $request){
+                $fields = $this->getFields('searchable');
+                $value = $request->get('search_' . static::name());
+
+                foreach($fields as $field){
+                    if ($field instanceof BelongsTo){
+                        $model = $field->getRelatedModelInstance();
+
+                        $query->leftJoin($model->getTable(), $field->attribute(), '=', $model->getTable().'.'.$model->getKeyName());
+                        $query->orWhere($model->getTable().'.'.$field->getForeignTitle(), 'like', '%'.$value.'%');
+                    }else {
+                        $query->orWhere($modelInstance->getTable().'.'.$field->attribute(), 'like', '%' . $value . '%');
+                    }
+                }
+            });
+        }
+        foreach($this->getFilters() as $filter){
+            if ($filter->value != null)
+                $filter->apply($query, $filter->value);
+        }
+
+        foreach($this->getFields('searchableAdvanced') as $field){
+            $field->advancedSearchValue = $request->get(static::name().'_s_'.$field->attribute());
+            $field->advancedSearchOperator = $request->get(static::name().'_o_'.$field->attribute());
+
+            if ($field->advancedSearchValue != null){
+
+                if ($field instanceof Boolean || $field instanceof Options)
+                    if ($field->advancedSearchValue == -1){
+                        $field->advancedSearchValue = null;
+                        continue;
+                    }
+
+                if ($field->advancedSearchOperator)
+                    $operator = $field->advancedSearchOperators()[$field->advancedSearchOperator - 1];
+                else
+                    $operator = new SimpleOperator('=');
+
+                $operator->apply($query, $modelInstance->getTable().'.'.$field->attribute(), $field->advancedSearchValue);
+            }
+        }
+        $this->buildIndexQuery($query);
+        return $query;
+    }
+
+    public function getQuery(){
+        if ($this->query == null)
+            $this->query = $this->newQuery();
+
         return $this->query;
     }
 }

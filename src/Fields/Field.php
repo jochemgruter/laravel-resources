@@ -24,6 +24,8 @@ abstract class Field extends Element
 
     protected $label;
 
+    public $table = null;
+
     public $value;
 
     public $help;
@@ -234,6 +236,11 @@ abstract class Field extends Element
 
     public function setResource(Resource $resource){
         $this->resource = $resource;
+    }
+
+    public function table($table){
+        $this->table = $table;
+        return $this;
     }
 
     public function rules($rules){
