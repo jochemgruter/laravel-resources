@@ -47,7 +47,7 @@ class HasMany extends Field implements Listable
 
     }
 
-    public function resolveResource(\Closure $resourceClosure){
+    public function tapResource(\Closure $resourceClosure){
         $this->resourceClosure = $resourceClosure;
         return $this;
     }

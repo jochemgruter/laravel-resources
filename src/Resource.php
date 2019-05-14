@@ -12,6 +12,7 @@ use Gate;
 use Gruter\ResourceViewer\Fields\BelongsTo;
 use Gruter\ResourceViewer\Fields\Boolean;
 use Gruter\ResourceViewer\Fields\Options;
+use Gruter\ResourceViewer\Fields\Text;
 use Gruter\ResourceViewer\Operators\SimpleOperator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
@@ -64,6 +65,8 @@ abstract class Resource
     private $assignModel;
 
     public $hideActions = false;
+
+    private $pivotTable = null;
 
     public function __construct()
     {
@@ -202,19 +205,23 @@ abstract class Resource
     }
 
     public function relatedToPivot(Model $model, $table, $foreignPivotKey, $relatedPivotKey, $parentKey, $relatedKey,
-                                   array $fields = null, array $relatedFields = null)
+                                    $fields)
     {
+        $this->pivotTable = $table;
 
-        if ($fields != null)
-            $this->fields = $fields;
+        foreach($fields ?? [] as $field)
+            $field->table($table);
+
+        $this->fields = $fields;
+        $this->fields[] = Text::make(static::$title, static::labelSingular());
 
         $query = $this->getQuery();
 
+        $query->addSelect($table.'.'.$parentKey);
+
         $relatedTable = $this->newModel()->getTable();
-        $query->addSelect($relatedTable.'.'.$relatedKey);
 
         $query->join($table, $table.'.'.$relatedPivotKey, '=', $relatedTable.'.'.$relatedKey);
-
         $query->where($table.'.'.$foreignPivotKey, $model->getAttributes($parentKey));
 
         return $this;
@@ -225,9 +232,6 @@ abstract class Resource
         // SELECT * FROM products JOIN product_composed ON product_composed.product_id = products.id
     }
 
-    public function assignableTo(Model $model){
-
-    }
 
     /**
      * @param $rows integer the default amount of rows per page
@@ -240,6 +244,11 @@ abstract class Resource
 
     public function hideActions(){
         $this->hideActions = true;
+        return $this;
+    }
+
+    public function setActions(array $actions){
+        $this->actions  = $actions;
         return $this;
     }
 
@@ -294,6 +303,10 @@ abstract class Resource
 
     public function newModel(){
         return new static::$model;
+    }
+
+    public function isPivot(){
+        return $this->pivotTable != null;
     }
 
     /**

@@ -16,7 +16,16 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                    @if($resource->canCreate())
+                    @if($resource->isPivot())
+
+                        <li>
+                            <a href="{{$resource->route('create')}}">
+                                <div class="fa fa-plus"></div>
+                                Toevoegen
+                            </a>
+                        </li>
+
+                    @elseif($resource->canCreate())
                         <li>
                             <a href="{{$resource->route('create')}}">
                                 <div class="fa fa-plus"></div>
@@ -227,11 +236,13 @@
                                 </a>
                             @endforeach
 
-                            @if($resource->canEdit($model))
-                                <a href="{{$resource->route('edit', $model->getKey()) }}"><div class="fa fa-edit"></div></a>
-                            @endif
-                            @if($resource->canView($model))
-                                <a href="{{$resource->route('show', $model->getKey()) }}"><div class="fa fa-eye"></div></a>
+                            @if(!$resource->isPivot())
+                                @if($resource->canEdit($model))
+                                    <a href="{{$resource->route('edit', $model->getKey()) }}"><div class="fa fa-edit"></div></a>
+                                @endif
+                                @if($resource->canView($model))
+                                    <a href="{{$resource->route('show', $model->getKey()) }}"><div class="fa fa-eye"></div></a>
+                                @endif
                             @endif
                         </td>
                     @endforeach

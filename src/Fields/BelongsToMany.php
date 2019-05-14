@@ -14,6 +14,10 @@ use Illuminate\Support\Str;
 class BelongsToMany extends Field implements Listable
 {
 
+    // TODO for this field:
+    //      make actions apply to the pivot table
+    //      hide show and can see buttons
+
     public $showOnIndex = false;
 
     /**
@@ -31,7 +35,7 @@ class BelongsToMany extends Field implements Listable
 
     private $fields;
 
-    private $relatedFields;
+    private $actions;
 
     public function __construct($resource, $label, $pivotTable, $foreignPivotKey = null, $relatedPivotKey = null, $parentKey = null, $relatedKey = null)
     {
@@ -54,13 +58,9 @@ class BelongsToMany extends Field implements Listable
         $foreignPivotKey = $this->foreignPivotKey ?? Str::singular($model->getTable()).'_'.$parentKey;
         $relatedPivotKey = $this->relatedPivotKey ?? Str::snake(Str::singular(class_basename($this->relatedResource))).'_'.$relatedKey;
 
-        //$this->fields[] = Number::make('customer_id', 'nummer')->table($this->pivotTable);
-
-        /*if ($this->relatedFields == null)
-            $this->relatedFields = [$this->relatedResource::$title];*/
-
         $resource = $this->relatedResource
-            ->relatedToPivot($model, $this->pivotTable, $foreignPivotKey, $relatedPivotKey, $parentKey, $relatedKey, $this->fields, $this->relatedFields);
+            ->relatedToPivot($model, $this->pivotTable, $foreignPivotKey, $relatedPivotKey, $parentKey, $relatedKey, $this->fields)
+            ->setActions($this->actions);
 
         if ($this->resourceClosure != null)
             call_user_func($this->resourceClosure, $resource);
@@ -69,7 +69,7 @@ class BelongsToMany extends Field implements Listable
 
     }
 
-    public function resolveResource(\Closure $resourceClosure){
+    public function tapResource(\Closure $resourceClosure){
         $this->resourceClosure = $resourceClosure;
         return $this;
     }
@@ -79,8 +79,8 @@ class BelongsToMany extends Field implements Listable
         return $this;
     }
 
-    public function withRelatedFields(array $relatedFields){
-        $this->relatedFields = $relatedFields;
+    public function withActions(array $actions){
+        $this->actions = $actions;
         return $this;
     }
 
