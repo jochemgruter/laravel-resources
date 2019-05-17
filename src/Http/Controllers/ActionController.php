@@ -57,7 +57,7 @@ class ActionController
             return $this->makeResponse($action, 'MESSAGE', ['message' => $message]);
         }
 
-        $fields = $action->fields();
+        $fields = $action->fields($models);
 
         if ($fields != null && count($fields) > 0)
             return $this->makeResponse($action, 'FORM', ['resource' => $resource->uri()]);
@@ -109,7 +109,7 @@ class ActionController
         if (!$action->authorizedToRun($models))
             return $this->makeResponse($action, 'MESSAGE', ['message' => 'Kan de actie niet uitvoeren op de models.']);
 
-        $fields = $action->fields();
+        $fields = $action->fields($models);
         $form = new FormBuilder($fields, $request->fullUrl());
         $form->defaultEmpty();
         $form->actionButton = 'Run';

@@ -74,7 +74,7 @@ abstract class Resource
     }
 
     /// setup ///
-    public abstract function fields();
+    public abstract function fields($model);
 
     public abstract function filters();
 
@@ -315,7 +315,7 @@ abstract class Resource
     public function getFields($criteria = null){
         if ($this->fields == null){
             $this->fields = [];
-            foreach ($this->fields() as $field){
+            foreach ($this->fields($this) as $field){
                 if ($field->authorizedTosee()){
                     $this->fields[] = $field;
                     $field->setResource($this);
