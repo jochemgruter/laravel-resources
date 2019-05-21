@@ -26,7 +26,7 @@ class Delete extends Action
         }
     }
 
-    public function fields()
+    public function fields($model)
     {
         // TODO: Implement fields() method.
     }

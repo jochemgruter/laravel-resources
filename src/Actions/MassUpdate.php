@@ -49,7 +49,7 @@ class MassUpdate extends Action
         return true;
     }
 
-    public function fields()
+    public function fields($model)
     {
         return $this->fields;
     }

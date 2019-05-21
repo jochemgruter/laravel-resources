@@ -30,7 +30,7 @@ abstract class Action extends Element
 
     public abstract function handle(Request $request, Collection $models);
 
-    public abstract function fields(Collection $models);
+    public abstract function fields($model);
 
     public function canRun(Collection $models){
         return true;
