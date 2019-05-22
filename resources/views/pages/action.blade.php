@@ -4,6 +4,8 @@
 
     <h1>{{$action->label()}}</h1>
 
+    {!! $resource->renderInfo($models) !!}
+    
     <div class="the-box">
 
         @include('ResourceViewer::partials.notifications')

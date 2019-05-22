@@ -184,6 +184,22 @@ abstract class Resource
         return $form;
     }
 
+    public function renderInfo($models){
+
+        $fields = $this->getFields('infoOnUpdate');
+        if (empty($fields))
+            return '';
+
+        $models = $models->map(function ($item) use ($fields) {
+            $fields = collect($fields)->mapWithKeys(function ($it) use ($item){
+                return [$it->label() => $it->display($item)];
+            });
+            return $fields;
+        });
+
+        return view('ResourceViewer::partials.info', ['fields' => $fields, 'models' => $models]);
+    }
+
     public function updateFormBuilder(Model $model){
         $fields = $this->getFields('showOnUpdate');
         $form = new FormBuilder($fields, static::route('update', $model->getKey()), self::MODE_UPDATE);

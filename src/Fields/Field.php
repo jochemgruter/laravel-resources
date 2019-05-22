@@ -37,6 +37,8 @@ abstract class Field extends Element
     public $showOnUpdate = true;
     public $showOnCreate = true;
 
+    public $infoOnUpdate = false;
+
     public $showOnLookup = true;
 
     public $displayOnlyOnUpdate = false;
@@ -136,6 +138,11 @@ abstract class Field extends Element
 
     public function searchable(){
         $this->searchable = true;
+        return $this;
+    }
+
+    public function infoOnUpdate(){
+        $this->infoOnUpdate = true;
         return $this;
     }
 
