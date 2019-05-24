@@ -211,6 +211,7 @@
             </thead>
             <tbody>
             @foreach($models as $model)
+                @if($resource->canSee($model))
                 <tr class="resource-row" data-id="{{$model->getKey()}}" data-name="{{$model->{$resource::$title} }}">
                     @if(count($actions) > 0)
                         <td>
@@ -245,8 +246,9 @@
                                 @endif
                             @endif
                         </td>
-                    @endforeach
+                        @endif
                 </tr>
+                @endforeach
             </tbody>
         </table>
     </div>

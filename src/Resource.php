@@ -298,7 +298,7 @@ abstract class Resource
 
     /// permissions
 
-    public function canSee(){
+    public function canSee(Model $model){
         return Gate::allows('index', static::$model);
     }
 
