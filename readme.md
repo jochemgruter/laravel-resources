@@ -7,7 +7,7 @@ package is fully integratable in your own application. Some of the code architec
 
 Below a very small example how the Resource class is build.
 
-```
+```php
 class Users extends Resource
 {
 
