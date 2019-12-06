@@ -137,24 +137,24 @@ abstract class Resource extends Element
      *
      * @return Field[]
      */
-    protected abstract function fields();
+    abstract protected function fields();
 
     /**
      * The filters of the Resource.
      *
      * @return Filter[]
      */
-    protected abstract function filters();
+    abstract protected function filters();
 
     /**
      * The actions of the Resource.
      *
      * @return Action[]
      */
-    protected abstract function actions();
+    abstract protected function actions();
 
     /**
-     * Function to override in case to modify the index query
+     * Function to override to modify the index query
      *
      * @param $query
      */

@@ -38,8 +38,17 @@ class PivotResource extends Resource
     private $label;
     private $labelSingular;
 
-    public function __construct(Model $model, $foreignResource, $relatedResource, $pivotTable,
-                                $foreignPivotKey, $relatedPivotKey, $parentKey, $relatedKey, $relationName, $uri)
+    public function __construct(
+        Model $model,
+        $foreignResource,
+        $relatedResource,
+        $pivotTable,
+        $foreignPivotKey,
+        $relatedPivotKey,
+        $parentKey,
+        $relatedKey,
+        $relationName,
+        $uri)
     {
 
         $this->instance = $model;
