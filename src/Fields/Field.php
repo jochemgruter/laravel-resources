@@ -20,13 +20,15 @@ use Illuminate\Support\Str;
 abstract class Field extends Element
 {
 
-    protected $attribute;
+    public $attribute;
 
     protected $label;
 
     public $table = null;
 
     public $value;
+
+    public $model;
 
     public $help;
 
@@ -36,10 +38,11 @@ abstract class Field extends Element
     public $showOnDetail = true;
     public $showOnUpdate = true;
     public $showOnCreate = true;
-
     public $showOnLookup = true;
 
     public $displayOnlyOnUpdate = false;
+
+    public $showCallbacks = [];
 
     public $sortable = false;
 
@@ -67,7 +70,7 @@ abstract class Field extends Element
         $this->label = $label ?? Str::title(Str::snake($attribute, ' '));
     }
 
-    public static function make(...$args){
+    public static function  make(...$args){
         return new static(...$args);
     }
 
@@ -96,7 +99,7 @@ abstract class Field extends Element
     }
 
     public function displayUsing(callable $displayUsing){
-        $this->displayUsing = $displayUsing;
+        $this->displayCallback = $displayUsing;
         return $this;
     }
 
@@ -104,8 +107,9 @@ abstract class Field extends Element
         $value = $this->resolve($model);
 
         if (is_callable($this->displayCallback))
-            $value = call_user_func($this->displayCallback, $value);
+            $value = call_user_func($this->displayCallback, $value, $model);
 
+        //TODO html escaping
         return $value;
     }
 
@@ -208,7 +212,7 @@ abstract class Field extends Element
 
     public function onlyOnDetail(){
         $this->hideOnindex()->hideOnCreate()->hideOnUpdate();
-        $this->showOnUpdate = true;
+        $this->showOnDetail = true;
         return $this;
     }
 
@@ -222,6 +226,37 @@ abstract class Field extends Element
         $this->hideOnindex()->hideOnUpdate()->hideOnDetail();
         $this->showOnCreate = true;
         return $this;
+    }
+
+    public function showOnDetail(Closure $callback){
+        $this->showOnDetail = true;
+        $this->showCallbacks['showOnDetail'] = $callback;
+        return $this;
+    }
+
+    public function showOnUpdate(Closure $callback){
+        $this->showOnUpdate = true;
+        $this->showCallbacks['showOnUpdate'] = $callback;
+        return $this;
+    }
+
+    public function showOnIndex(Closure $callback){
+        $this->showOnIndex = true;
+        $this->showCallbacks['showOnIndex'] = $callback;
+        return $this;
+    }
+
+    public function showOnCreate(Closure $callback){
+        $this->showOnIndex = true;
+        $this->showCallbacks['showOnCreate'] = $callback;
+        return $this;
+    }
+
+    public function showUsingCallback($criteria, $model = null){
+        if (!isset($this->showCallbacks[$criteria]))
+            return true;
+
+        return call_user_func($this->showCallbacks[$criteria], $model);
     }
 
     public function hideOnForms(){

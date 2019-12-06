@@ -4,7 +4,6 @@
 namespace Gruter\ResourceViewer\Fields;
 
 
-use Gruter\ResourceViewer\Contracts\Listable;
 use Gruter\ResourceViewer\Resource;
 use Illuminate\Database\Eloquent\Model;
 

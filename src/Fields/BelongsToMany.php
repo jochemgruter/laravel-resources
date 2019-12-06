@@ -3,10 +3,7 @@
 
 namespace Gruter\ResourceViewer\Fields;
 
-
-use App\Models\Customer;
-use App\Resources\Brands;
-use Gruter\ResourceViewer\Contracts\Listable;
+use Gruter\ResourceViewer\PivotResource;
 use Gruter\ResourceViewer\Resource;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -14,11 +11,9 @@ use Illuminate\Support\Str;
 class BelongsToMany extends Field implements Listable
 {
 
-    // TODO for this field:
-    //      make actions apply to the pivot table
-    //      hide show and can see buttons
-
     public $showOnIndex = false;
+
+    public $uri;
 
     /**
      * @var Resource
@@ -40,32 +35,23 @@ class BelongsToMany extends Field implements Listable
     public function __construct($resource, $label, $pivotTable, $foreignPivotKey = null, $relatedPivotKey = null, $parentKey = null, $relatedKey = null)
     {
         if (!(($this->relatedResource = new $resource) instanceof Resource)) {
-            throw new \InvalidArgumentException('Resource parameters must be a class which is a child of the Resource class');
+            throw new \InvalidArgumentException('Resource parameters must be a class which is an instance of the Resource class');
         }
         $this->pivotTable = $pivotTable;
         $this->foreignPivotKey = $foreignPivotKey;
         $this->relatedPivotKey = $relatedPivotKey;
         $this->parentKey = $parentKey;
         $this->relatedKey = $relatedKey;
+        $this->uri = $pivotTable;
 
         parent::__construct($resource, $label ?? $this->relatedResource->label());
     }
 
     public function display(Model $model)
     {
-        $parentKey = $this->parentKey ?? $model->getKeyName();
-        $relatedKey = $this->relatedResource->newModel()->getKeyName();
-        $foreignPivotKey = $this->foreignPivotKey ?? Str::singular($model->getTable()).'_'.$parentKey;
-        $relatedPivotKey = $this->relatedPivotKey ?? Str::snake(Str::singular(class_basename($this->relatedResource))).'_'.$relatedKey;
+        $pivotResource = $this->makePivotResource($model);
 
-        $resource = $this->relatedResource
-            ->relatedToPivot($model, $this->pivotTable, $foreignPivotKey, $relatedPivotKey, $parentKey, $relatedKey, $this->fields)
-            ->setActions($this->actions);
-
-        if ($this->resourceClosure != null)
-            call_user_func($this->resourceClosure, $resource);
-
-        return $resource->renderIndexTable();
+        return $pivotResource->renderIndexTable();
 
     }
 
@@ -82,6 +68,42 @@ class BelongsToMany extends Field implements Listable
     public function withActions(array $actions){
         $this->actions = $actions;
         return $this;
+    }
+
+    public function uri($uri){
+        $this->uri = $uri;
+        return $this;
+    }
+
+    /**
+     * @param Model $model the related model instance of the pivot
+     * @return PivotResource
+     */
+    public function makePivotResource(Model $model){
+        $parentKey = $this->parentKey ?? $model->getKeyName();
+        $relatedKey = $this->relatedResource->newModel()->getKeyName();
+        $foreignPivotKey = $this->foreignPivotKey ?? Str::singular($model->getTable()).'_'.$parentKey;
+        $relatedPivotKey = $this->relatedPivotKey ?? Str::snake(Str::singular(class_basename($this->relatedResource))).'_'.$relatedKey;
+
+        $relationName = str_replace('_'.$relatedKey, '', $relatedPivotKey);
+
+        $fields = array_merge([
+            BelongsTo::make($relatedPivotKey, $this->relatedResource->labelSingular(), $this->relatedResource,
+                $this->relatedKey, $relationName)
+                ->rules('required'),
+        ], $this->fields ?? []);
+
+        $resource = new PivotResource($model, $this->resource, $this->relatedResource, $this->pivotTable,
+            $foreignPivotKey, $relatedPivotKey, $parentKey, $relatedKey, $relationName, $this->uri);
+
+        $resource->setFields($fields);
+        $resource->setActions($this->actions);
+        $resource->setLabel($this->label);
+
+        if ($this->resourceClosure != null)
+            call_user_func($this->resourceClosure, $resource);
+
+        return $resource;
     }
 
     protected function resolve(Model $model)

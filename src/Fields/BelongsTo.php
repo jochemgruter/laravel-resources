@@ -9,55 +9,56 @@
 namespace Gruter\ResourceViewer\Fields;
 
 
-use Gruter\ResourceViewer\Contracts\Resource;
+use App\Models\Customer;
 use Gruter\ResourceViewer\Operators\SimpleOperator;
+use Gruter\ResourceViewer\Resource;
+use Gruter\ResourceViewer\Tests\Fixtures\Categories;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class BelongsTo extends Field
 {
 
-    // TODO remove the VOB model option if all VOB models have a Resource
-
     private $related;
 
     /**
-     * Temporarily field
-     * @var boolean true if the related field is a vob model
+     * @var \Gruter\ResourceViewer\Resource
      */
-    private $isVobModel;
+    private $relatedInstance;
 
-    /**
-     * BelongsTo constructor.
-     * @param $attribute
-     * @param null $label
-     * @param null $related  either Resource or VOB model
-     * @param boolean set true if there is no resource for the relation and the related class is a VOB model
-     */
-    public function __construct($attribute, $label = null, $related = null, $isVobModel = false){
+    private $ownerKey;
+
+    private $relationName;
+
+    private $disableLink = false;
+
+    public function __construct($attribute, $label = null, $related = null, $ownerKey = 'id', $relationName = null){
 
         $this->related = $related ?? $this->guessRelatedResource($attribute);
 
-        $this->isVobModel = $isVobModel;
+        $this->relatedInstance = new $this->related;
+
+        $this->ownerKey = $ownerKey;
+
+        if (is_null($relationName)){
+            $relationName = camel_case(str_replace('_'.$ownerKey, '', $attribute));
+        }
+
+        $this->relationName = $relationName;
+
+        if ( ! ($this->relatedInstance instanceof \Gruter\ResourceViewer\Resource))
+        throw new \InvalidArgumentException('Related resource must be a child of Resource');
+
+        $this->displayUsing(function($value, Model $model){
+            if ($relatedModel = $this->getRelatedModel($model))
+                return $this->getDisplayValue($relatedModel);
+
+            return '';
+        });
 
         parent::__construct($attribute, $label);
     }
 
-    protected function resolve(Model $model){
-
-        // TODO  fix the _id and find the actual relation name
-        $relationName = camel_case(str_replace('_id', '', $this->attribute));
-        $title = null;
-
-        $title = $this->getForeignTitle();
-        $value = '';
-
-        if ($model->{$relationName} != null)
-            $value = $model->{$relationName}->{$title};
-
-        return $value;
-
-    }
 
     private function guessRelatedResource($attribute){
         $name = ucfirst(camel_case(str_replace('_id', '', Str::plural($attribute))));
@@ -66,42 +67,58 @@ class BelongsTo extends Field
     }
 
     public function getRelatedModelInstance(){
-        if ($this->isVobModel){
-            return new $this->related;
-        }else{
-            $model = ($this->related)::$model;
-            return new $model;
-        }
+        $model = ($this->related)::$model;
+        return new $model;
     }
 
     public function getForeignTitle(){
-        if ($this->isVobModel){
-            return($this->related)::$default_value;
-        }else{
-            return ($this->related)::$title;
-        }
+        return ($this->related)::$title;
     }
 
-    public function getRelatedValue($value = null){
-        if(is_null($value)) $value = $this->value;
+    public function getDisplayValue(Model $relatedModel){
+        $value = $relatedModel->getAttributeValue($this->getForeignTitle());
+
+        if (! $this->disableLink && $this->relatedInstance->authorizedToView($relatedModel))
+            return view('ResourceViewer::partials.link', [
+                'url' => $this->getRelatedLink($relatedModel), 'label' => $value]);
 
 
-        $related  = '';
-        if (is_numeric($value) && $value > 0) {
-            $title = $this->getForeignTitle();
-            $model = ($this->related::$model)::select($title)->find($value);
-            if ($model != null) {
-                $related = $model->getAttribute($title);
-            }
-        }
+        return $value ?? '';
+    }
 
-        return $related;
+    public function getRelatedModel(Model $model){
+
+        if (isset($model->{$this->relationName}) && $model->{$this->relationName} instanceof $this->related::$model)
+            $relatedModel = $model->{$this->relationName};
+
+        else
+            $relatedModel = $model->belongsTo($this->related::$model, $this->attribute, $this->ownerKey,
+                $this->relationName)->first();
+
+        return $relatedModel;
+    }
+
+    public function getRelatedModelById($id){
+        $model = ($this->related)::$model;
+        return $model::where($this->ownerKey, $id)->first();
     }
 
     protected function view($attribute, $value, ...$args)
     {
+
+        if (! is_null($this->model))
+            $relatedModel = $this->getRelatedModel($this->model);
+
+        else if (!is_null($value))
+            $relatedModel = $this->getRelatedModelById($value);
+
+        if (isset($relatedModel))
+            $relatedValue = $this->getDisplayValue($relatedModel);
+
         $resourceUri = ($this->related)::uri();
-        return view('ResourceViewer::fields.belongsTo', ['field' => $this, 'resourceUri' => $resourceUri, 'attribute' => $attribute, 'value' => $value]);
+        return view('ResourceViewer::fields.belongsTo',
+            ['field' => $this, 'resourceUri' => $resourceUri, 'attribute' => $attribute, 'value' => $value,
+                'relatedValue' => $relatedValue ?? '']);
     }
 
     public function advancedSearchOperators()
@@ -112,5 +129,12 @@ class BelongsTo extends Field
         ];
     }
 
+    public function getRelatedLink(Model $relatedModel){
+        return $this->relatedInstance->route('show', $relatedModel->getKey());
+    }
 
+    public function disabledLink(){
+        $this->disableLink = true;
+        return $this;
+    }
 }

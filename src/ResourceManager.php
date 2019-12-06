@@ -8,64 +8,132 @@
 
 namespace Gruter\ResourceViewer;
 
+use Gruter\ResourceViewer\Events\ResourceBooted;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
 class ResourceManager
 {
 
     /**
-     * @var array Resource
+     * All registered resources
+     *
+     * @var array
      */
-    private $resources;
+    private $resources = [];
 
-    public function register($resource){
-        $this->resources[$resource::name()] = $resource;
-    }
-
-    public function get($name){
-        if (isset($this->resources[$name])){
-            return $this->resources[$name];
+    public function register($resources){
+        if (!is_array($resources)) {
+            $resources = [$resources];
         }
-        return null;
+        $this->resources = array_merge($this->resources, $resources);
     }
 
-    public function fromUri($uri){
+    /**
+     * Returns the classpath of a Resource
+     *
+     * @param  string $name class basename or classpath
+     * @return string
+     */
+    public function get($name)
+    {
+        if (in_array($name, $this->resources))
+            return $name;
+
+        foreach($this->resources as $resource){
+            if (class_basename($resource) == $name)
+                return $resource;
+        }
+    }
+
+    /**
+     * Returns the classpath of a Resource matched by the given uri
+     *
+     * @param  string  $uri
+     * @return string
+     */
+    public function fromUri($uri)
+    {
         foreach($this->resources as $resource){
             if ($resource::uri() == $uri){
                 return $resource;
             }
         }
-        return null;
     }
 
+    /**
+     * Get all registered resources
+     *
+     * @return array
+     */
     public function all(){
         return array_values($this->resources);
     }
 
+    /**
+     * Get all available routes of the registered resources.
+     *
+     * @return array
+     */
     public function allUris(){
-        $uris = [];
+        $uris = ['index' => [], 'create' => [], 'show' => [], 'edit' => [], 'update' => [], 'store' => [], 'lookup' => []];
+
         foreach($this->resources as $resource){
-            $uris[] = $resource::uri();
+            foreach ($uris as $key => $value){
+                if(in_array($key, $resource::routes())){
+                    $uris[$key][] = $resource::uri();
+                }
+            }
         }
+
         return $uris;
     }
 
-    public function findOrFail($resource){
+    /**
+     * Get and initiates a Resource
+     *
+     * @param  string $resource
+     * @return Resource|null
+     */
+    public function find($resource){
         $resource = $this->get($resource);
 
         if ($resource != null){
             $resource = new $resource;
             return $resource;
         }
-        abort(404);
     }
 
-    public function findOrFailFromUri($resource){
-        $resource = $this->fromUri($resource);
+    /**
+     * Get and initiates a Resource
+     *
+     * @param  string $resource
+     * @return Resource
+     *
+     * @throws NotFoundHttpException
+     */
+    public function findOrFail($resource){
+        $resource = $this->find($resource);
+        if ($resource != null)
+            return $resource;
+
+        throw new NotFoundHttpException();
+    }
+
+    /**
+     * Get and initiates a Resource for the given uri
+     *
+     * @param  string $uri
+     * @return Resource
+     */
+    public function findOrFailFromUri($uri){
+        $resource = $this->fromUri($uri);
 
         if ($resource != null){
             $resource = new $resource;
             return $resource;
         }
-        abort(404);
+
+        throw new NotFoundHttpException();
     }
 
 }

@@ -8,7 +8,7 @@
             <img src="/vendor/resource-viewer/loading.gif" class="loading-img"/>
 
             <span class="related-value">
-                {{$field->getRelatedValue($value)}}
+                {!! $relatedValue  !!}
             </span>
         </div>
     </div>

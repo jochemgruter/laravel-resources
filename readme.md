@@ -1,7 +1,47 @@
 # Resource viewer for laravel
 
-Makes it easy to list, view, edit through your laravel models. Possibilities to assign filters, actions and forms to your resources. Project is currently in development fase.
+Beautiful designed CRUD package. Create your resources and assign Fields, Filters, Relations and Actions. This 
+package is fully integratable in your own application. Some of the code architecture is inspired by Laravel Nova.   
+
+## Example code 
+
+Below a very small example how the Resource class is build.
+
+```
+class Users extends Resource
+{
+
+    public static $model = User::class;
+
+    public static $title = 'name';
+
+    public function fields()
+    {
+        return [
+            ID::make()
+                ->hideOnCreate()
+                ->hideOnUpdate(),
+
+            Text::make('name'),
+
+            Text::make('email')->displayUsing(function($value, $model){
+                return $value ?? '-';
+            })
+        ];
+    }
+
+    public function filters()
+    {
+        //
+    }
+
+    public function actions()
+    {
+        //
+    }
+}
+```
 
 ## In development
 
-Project in development. Questions or want to contribute, ask jochemgruter@gmail.com
+Project is currently in heavy development.

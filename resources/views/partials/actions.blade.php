@@ -1,8 +1,6 @@
+<div class="form-inline" id="action-form" data-resource="{{$resource->name()}}" data-model="{{$model->getKey()}}">
 
-
-<form class="form-inline" id="action-form" data-resource="{{$resource::name()}}" data-model="{{$model->getKey()}}">
-
-    <input type="hidden" name="ids[]" value="{{$model->getKey()}}" class="resource-model">
+    <input type="hidden" name="__ids[]" value="{{$model->getKey()}}" class="resource-model action-attribute">
 
     @if(!$hideSelect)
         <select class="form-control">
@@ -26,7 +24,7 @@
     @foreach($actions as $action)
 
         @if($action->displayOnRow)
-            <a href="#" class="btn btn-primary resource-action" data-resource="{{$resource::name()}}" data-action="{{$action->name()}}">
+            <a href="#" class="btn btn-primary resource-action" data-resource="{{$resource->name()}}" data-action="{{$action->name()}}">
                 <div class="fa {{$action->icon}}"></div> {{$action->label()}}
             </a>
         @endif
@@ -34,7 +32,11 @@
     @endforeach
 
     @if($resource->canEdit($model))
-        <a href="{{$resource->route('edit', $model->getKey())}}" class="btn btn-primary"><div class="fa fa-edit"></div> Edit</a>
+        <a href="{{$resource->route('edit', $model->getKey())}}" class="btn btn-primary">
+            <div class="fa fa-edit"></div> Edit
+        </a>
     @endif
 
-</form>
+</div>
+
+@include('ResourceViewer::partials.actionForms')

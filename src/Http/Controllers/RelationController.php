@@ -9,7 +9,7 @@
 namespace Gruter\ResourceViewer\Http\Controllers;
 
 
-use Gruter\ResourceViewer\Contracts\Resource;
+use Gruter\ResourceViewer\Facades\Resource;
 use Illuminate\Http\Request;
 
 class RelationController

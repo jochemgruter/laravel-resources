@@ -9,6 +9,8 @@
 namespace Gruter\ResourceViewer\Actions;
 
 use Gruter\ResourceViewer\Element;
+use Gruter\ResourceViewer\FormBuilder;
+use Gruter\ResourceViewer\Resource;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -28,31 +30,50 @@ abstract class Action extends Element
 
     public $displayOnRowWithLabel = false;
 
-    public abstract function handle(Request $request, Collection $models);
+    private $resource;
 
-    public abstract function fields();
-
-    public function canRun(Collection $models){
-        return true;
-    }
+    private $fields = null;
 
     /**
-     * @param $models mixed either array, collection or single model instance
-     * @return bool returns true if the action is authorized to run on the given models
+     * Permission to run the action
+     *
+     * @var callable|bool
      */
-    final public function authorizedToRun($models)
-    {
-        if (is_array($models))
-            $models = collect($models);
+    private $runCallback = true;
 
-        if ($models instanceof Model)
-            $models = collect([$models]);
+    public abstract function handle(Request $request, Collection $models);
 
-        if ($models instanceof Collection)
-            return $this->canRun($models);
+    protected abstract function fields();
 
-        return false;
+    public function getFields(){
+        if ($this->fields == null){
+            $this->fields = collect($this->fields() ?? []);
+        }
+        return $this->fields;
     }
+
+    public function hasForm(){
+        return count($this->getFields()) > 0;
+    }
+
+    public function makeForm(){
+        if($this->resource == null)
+            return null; //TODO throw exception
+
+        $actionUrl = route('resources.action.form_submit', ['resource' => $this->resource->uri(), 'action' => $this->name()])
+            . '?' . request()->getQueryString();
+
+        $fields = $this->getFields();
+        $form = new FormBuilder($fields, $actionUrl);
+        $form->defaultEmpty();
+        $form->columnsLabel = 4;
+        return $form;
+    }
+
+    public function setResource(Resource $resource){
+        $this->resource = $resource;
+    }
+
 
     public function singleOnly(){
         $this->multiSelection = false;
@@ -64,6 +85,39 @@ abstract class Action extends Element
         $this->displayOnRow = true;
         $this->displayOnRowWithLabel = $displayOnRowWithLabel;
         return $this;
+    }
+
+    public function icon($icon){
+        $this->icon = $icon;
+        return $this;
+    }
+
+    /**
+     * Set the permission to run the Action
+     *
+     * @param  callable|bool $callback
+     * @return $this
+     */
+    public function canRun($callback){
+        $this->runCallback = $callback;
+        return $this;
+    }
+
+    /**
+     * Authorisation to run the Action
+     *
+     * @param  Model  $model
+     * @return bool|callable|mixed
+     */
+    public function authorizedToRun(Model $model)
+    {
+        if (is_bool($this->runCallback))
+            return $this->runCallback;
+
+        if (is_callable($this->runCallback))
+            return call_user_func($this->runCallback, $model);
+
+        return true;
     }
 
 }

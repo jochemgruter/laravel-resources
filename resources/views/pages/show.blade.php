@@ -12,49 +12,8 @@
         </div>
     </div>
 
-    <div class="the-box">
+    @include('ResourceViewer::partials.notifications')
 
-        @include('ResourceViewer::partials.notifications')
-
-        <div class="form-horizontal">
-
-            @foreach($fields as $field)
-                @if($field instanceof \Gruter\ResourceViewer\Contracts\Listable)
-                    @continue
-                @endif
-
-                <div class="form-group">
-                    <div class="col-lg-3">
-
-                        <label for="" class="">{{$field->label()}}</label>
-
-                        @if($field->help != null)
-                            <p class="help-block">{{$field->help}}</p>
-                        @endif
-                    </div>
-                    <div class="col-lg-9">
-
-                        {!! $field->display($model) !!}
-
-                    </div>
-                </div>
-            @endforeach
-
-        </div>
-    </div>
-
-    @foreach($fields as $field)
-        @if(!($field instanceof \Gruter\ResourceViewer\Contracts\Listable))
-            @continue
-        @endif
-
-
-        <h2>{{$field->label()}}</h2>
-
-        <div class="the-box">
-            {!! $field->display($model) !!}
-        </div>
-
-    @endforeach
+    {!! $resource->renderDetails($model) !!}
 
 @endsection

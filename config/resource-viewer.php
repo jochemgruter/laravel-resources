@@ -4,11 +4,11 @@ return [
 
     'route' => '/',
 
-    'middleware' => ['web', 'auth:employee'],
+    'middleware' => ['web', 'auth'],
 
     'layout' => [
 
-        'view' => 'layouts.main',
+        'view' => 'ResourceViewer::exampleLayout',
 
         'section' => 'content'
     ],

@@ -8,7 +8,7 @@
 
         @include('ResourceViewer::partials.notifications')
 
-        {!! $resource->createFormBuilder()->render() !!}
+        {!! $resource->makeCreationForm()->render() !!}
 
     </div>
 

@@ -8,7 +8,8 @@
 
         @include('ResourceViewer::partials.notifications')
 
-        Run this action over {{$models->count()}} {{strtolower($resource->label())}}<br/><br/>
+        Run this action over {{$models->count()}}
+        {{strtolower($models->count() == 1 ? $resource->labelSingular() : $resource->label())}}<br/><br/>
 
         {!! $form->render() !!}
 
