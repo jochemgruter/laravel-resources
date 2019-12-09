@@ -296,8 +296,8 @@ abstract class Resource extends Element
     {
         $countSelect = 0;
 
-        $actions = collect($this->getActions())->filter(function($action) use ($model, &$countSelect){
-            $canRun = $action->canRun($model);
+        $actions = collect($this->getActions())->filter(function(Action $action) use ($model, &$countSelect){
+            $canRun = $action->authorizedToRun($model);
             $countSelect += $canRun && !$action->displayOnRow ? 1 : 0;
             return $canRun;
         })->toArray();

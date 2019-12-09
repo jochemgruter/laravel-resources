@@ -31,7 +31,7 @@
 
     @endforeach
 
-    @if($resource->canEdit($model))
+    @if($resource->authorizedToEdit($model))
         <a href="{{$resource->route('edit', $model->getKey())}}" class="btn btn-primary">
             <div class="fa fa-edit"></div> Edit
         </a>
