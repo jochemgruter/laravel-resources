@@ -11,6 +11,7 @@ namespace Gruter\ResourceViewer;
 
 use Gruter\ResourceViewer\Contracts\Listable;
 use Gruter\ResourceViewer\Fields\Boolean;
+use Gruter\ResourceViewer\Fields\Field;
 use Gruter\ResourceViewer\Fields\Options;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -72,15 +73,17 @@ class FormBuilder
      * Initiates a new FormBuilder with a fields array
      *
      * @param  Collection  $fields
-     * @param $action
+     * @param  string $action
+     * @param  int  $mode
      */
-    public function __construct(Collection $fields, $action)
+    public function __construct(Collection $fields, $action, $mode = 0)
     {
         $this->fields = $fields->reject(function($field){
             return $field instanceof Listable;
         });
 
         $this->action = $action;
+        $this->mode = $mode;
     }
 
     /**
@@ -113,17 +116,14 @@ class FormBuilder
      * Get the validator that is initiated with the field rules and request input
      *
      * @param  Request  $request
-     * @return \Illuminate\Validation\Validator
+     * @return \Illuminate\Contracts\Validation\Validator
      */
     public function getValidator(Request $request){
-        // TODO rules type (eg update or creation)
+        $rules = $this->fields->mapWithKeys(function (Field $field) {
+            return [$field->attribute => $field->getRules($this->mode)];
+        })->toArray();
 
-        $data = $request->all();
-        $rules = [];
-        foreach($this->fields as $field){
-            $rules[$field->attribute()] = $field->getRules();
-        }
-        return \Validator::make($data,  $rules);
+        return \Validator::make($request->all(),  $rules);
     }
 
     /**

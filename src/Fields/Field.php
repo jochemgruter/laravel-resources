@@ -284,17 +284,18 @@ abstract class Field extends Element
     }
 
     public function creationRules($rules){
-        $this->creationRules = is_string($rules) ? func_get_args() : $rules;
+        $this->rulesCreation = is_string($rules) ? func_get_args() : $rules;
         return $this;
     }
 
     public function updateRules($rules){
-        $this->updateRules = is_string($rules) ? func_get_args() : $rules;
+        $this->rulesUpdate = is_string($rules) ? func_get_args() : $rules;
         return $this;
     }
 
     public function getRules($mode = 0){
         $rules = $this->rules;
+
         if ($mode == Resource::MODE_CREATE){
             $rules = array_merge($rules, $this->rulesCreation);
         }

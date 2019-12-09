@@ -334,7 +334,7 @@ abstract class Resource extends Element
     public function makeCreationForm()
     {
         $fields = $this->getFields('showOnCreate');
-        $form = new FormBuilder($fields, $this->route('store'));
+        $form = new FormBuilder($fields, $this->route('store'), self::MODE_CREATE);
         $form->actionButton = 'Create';
         return $form;
     }
@@ -349,7 +349,7 @@ abstract class Resource extends Element
     public function makeUpdateForm(Model $model)
     {
         $fields = $this->getFields('showOnUpdate');
-        $form = new FormBuilder($fields, $this->route('update', $model->getKey()));
+        $form = new FormBuilder($fields, $this->route('update', $model->getKey()), self::MODE_UPDATE);
         $form->method = 'PUT';
         $form->actionButton = 'Update';
         $form->model($model);
