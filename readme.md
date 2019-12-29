@@ -22,11 +22,14 @@ class Users extends Resource
                 ->hideOnCreate()
                 ->hideOnUpdate(),
 
-            Text::make('name'),
+            Text::make('name')
+                ->rules('required'),
 
-            Text::make('email')->displayUsing(function($value, $model){
-                return $value ?? '-';
-            })
+            Text::make('email')
+                ->displayUsing(function($value, $model){
+                    return $value ?? '-';
+                })
+                ->rules('required', 'email'),
         ];
     }
 

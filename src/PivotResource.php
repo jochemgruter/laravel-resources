@@ -102,8 +102,7 @@ class PivotResource extends Resource
     public function makeAssignForm()
     {
         $fields = $this->getFields('showOnCreate');
-        $form = new FormBuilder($fields, $this->route('assign'));
-        return $form;
+        return new FormBuilder($fields, $this->route('assign'));
     }
 
     final public function canAssign($callback = true){
@@ -162,12 +161,10 @@ class PivotResource extends Resource
 
     public function getQueryResult($query)
     {
-        $result = $query->get()->map(function($item){
+        return $query->get()->map(function($item){
             $item->pivot->setRelation($this->relationName, $item);
             return $item->pivot;
         });
-
-        return $result;
     }
 
     public function setFields($fields)
