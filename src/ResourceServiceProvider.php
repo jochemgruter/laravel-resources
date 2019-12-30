@@ -28,7 +28,7 @@ class ResourceServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'ResourceViewer');
 
         Route::namespace($this->namespace)
-            ->middleware(config('resource-viewer.middleware'))
+            ->middleware(config('resources.middleware'))
             ->group(__DIR__.'/../routes/web.php');
 
 
@@ -39,13 +39,11 @@ class ResourceServiceProvider extends ServiceProvider
         ], 'public');
 
         $this->publishes([
-            __DIR__.'/../config/resource-viewer.php' => config_path('resource-viewer.php'),
+            __DIR__.'/../config/resources.php' => config_path('resources.php'),
         ]);
 
 
         $this->registerGates();
-
-        $this->extendCollection();
     }
 
     public function register()
@@ -54,7 +52,7 @@ class ResourceServiceProvider extends ServiceProvider
         $this->app->bind('resource', ResourceManager::class);
 
         $this->mergeConfigFrom(
-            __DIR__.'/../config/resource-viewer.php', 'resource-viewer'
+            __DIR__.'/../config/resources.php', 'resources'
         );
 
     }
@@ -78,30 +76,6 @@ class ResourceServiceProvider extends ServiceProvider
 
         Gate::define('resource.assign', function($user, PivotResource $resource){
             return $resource->authorizedToAssign();
-        });
-    }
-
-    private function extendCollection(){
-        Collection::macro('sumUpToString', function($title, $label, $labelSingular = null, $copulative = 'and', $other = 'other'){
-            if ($labelSingular == null)
-                $labelSingular = Str::plural($label);
-
-            switch($this->count()){
-                case 0:
-                    return '0 '.$label;
-
-                case 1:
-                    return $this->get(0)->$title .' '. $labelSingular;
-
-                case 2:
-                    return $this->get(0)->$title .' '.$copulative.' '. $this->get(1)->$title.' '. $label;
-
-                case 3:
-                    return $this->get(0)->$title.', '. $this->get(1)->$title.' '.$copulative.' '.$this->get(2)->$title.' '.$label;
-
-                default:
-                    return $this->get(0)->$title.', '.$this->get(1)->$title.' '.$copulative.' '.($this->count() - 2).' '.$other.' '.$label;
-            }
         });
     }
 }

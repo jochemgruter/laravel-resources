@@ -482,7 +482,7 @@ abstract class Resource extends Element
      */
     public static function uri()
     {
-        return str_replace('_', '-', snake_case(class_basename(get_called_class())));
+        return str_replace('_', '-', Str::snake(class_basename(get_called_class())));
     }
 
     /**
