@@ -2,6 +2,7 @@
 
 namespace Gruter\ResourceViewer;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
@@ -58,23 +59,23 @@ class ResourceServiceProvider extends ServiceProvider
     }
 
     private function registerGates(){
-        Gate::define('resource.index', function($user, Resource $resource){
+        Gate::define('resource.index', function(?Authenticatable $user, Resource $resource){
             return $resource->authorizedToSee();
         });
 
-        Gate::define('resource.create', function($user, Resource $resource){
+        Gate::define('resource.create', function(?Authenticatable $user, Resource $resource){
             return $resource->authorizedToCreate();
         });
 
-        Gate::define('resource.view', function($user, Resource $resource, Model $model){
+        Gate::define('resource.view', function(?Authenticatable $user, Resource $resource, Model $model){
             return $resource->authorizedToView($model);
         });
 
-        Gate::define('resource.edit', function($user, Resource $resource, Model $model){
+        Gate::define('resource.edit', function(?Authenticatable $user, Resource $resource, Model $model){
             return $resource->authorizedToEdit($model);
         });
 
-        Gate::define('resource.assign', function($user, PivotResource $resource){
+        Gate::define('resource.assign', function(?Authenticatable $user, PivotResource $resource){
             return $resource->authorizedToAssign();
         });
     }
