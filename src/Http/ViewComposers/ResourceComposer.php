@@ -16,8 +16,8 @@ class ResourceComposer
 {
     public function compose(View $view)
     {
-        $view->with('layout', config('resource-viewer.layout.view'));
-        $view->with('section', config('resource-viewer.layout.section'));
+        $view->with('layout', config('resources.layout.view'));
+        $view->with('section', config('resources.layout.section'));
     }
 
 }

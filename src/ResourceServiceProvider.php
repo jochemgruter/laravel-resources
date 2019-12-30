@@ -36,7 +36,7 @@ class ResourceServiceProvider extends ServiceProvider
         View::composer('ResourceViewer::pages.*', 'Gruter\ResourceViewer\Http\ViewComposers\ResourceComposer');
 
         $this->publishes([
-            __DIR__.'/../resources/assets' => public_path('vendor/resource-viewer/'),
+            __DIR__.'/../resources/assets' => public_path('vendor/resources/'),
         ], 'public');
 
         $this->publishes([
