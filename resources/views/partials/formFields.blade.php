@@ -1,5 +1,9 @@
 <div class="form-horizontal">
     @foreach($form->getFields() as $field)
+        @if($field instanceof \Gruter\ResourceViewer\Fields\Listable)
+            @continue
+            {{-- TODO handle this in FormBuilder class --}}
+        @endif
 
         <div class="form-group
             {{isset($errors) && $errors->has($field->attribute()) ? 'has-feedback has-error' : ''}}">
