@@ -32,6 +32,8 @@ abstract class Action extends Element
 
     private $resource;
 
+    private $index;
+
     private $fields = null;
 
     /**
@@ -60,7 +62,7 @@ abstract class Action extends Element
         if($this->resource == null)
             return null; //TODO throw exception
 
-        $actionUrl = route('resources.action.form_submit', ['resource' => $this->resource->uri(), 'action' => $this->name()])
+        $actionUrl = route('resources.action.form_submit', ['resource' => $this->resource->uri(), 'action' => $this->index])
             . '?' . request()->getQueryString();
 
         $fields = $this->getFields();
@@ -70,8 +72,9 @@ abstract class Action extends Element
         return $form;
     }
 
-    public function setResource(Resource $resource){
+    public function setResource(Resource $resource, int $index){
         $this->resource = $resource;
+        $this->index = $index;
     }
 
 

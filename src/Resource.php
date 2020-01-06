@@ -645,17 +645,11 @@ abstract class Resource extends Element
     /**
      * Get a particular Action
      *
-     * @param  $namee
+     * @param  $index
      * @return Action action
      */
-    public function getAction($name){
-        foreach($this->getActions() as $action){
-            if ($action->name() == $name) {
-                $action->setResource($this);
-                return $action;
-            }
-        }
-        return null;
+    public function getAction($index){
+        return $this->getActions()->get($index);
     }
 
     /**
@@ -667,8 +661,8 @@ abstract class Resource extends Element
     public function getActions($criteria = null){
         if ($this->actions == null) {
 
-            $this->actions = collect($this->actions() ?? [])->filter(function(Action $action){
-                $action->setResource($this);
+            $this->actions = collect($this->actions() ?? [])->filter(function(Action $action, &$index){
+                $action->setResource($this, $index++);
                 return $action->authorizedToSee();
             });
         }

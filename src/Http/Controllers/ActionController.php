@@ -15,10 +15,10 @@ use Illuminate\Http\Request;
 class ActionController
 {
 
-    public function handle(Request $request, $resource, $action){
+    public function handle(Request $request, $resource, $actionIndex){
 
         $resource = Resource::findOrFailFromUri($resource);
-        $action = $resource->getAction($action);
+        $action = $resource->getAction($actionIndex);
 
         if ($action == null)
             abort(404);
