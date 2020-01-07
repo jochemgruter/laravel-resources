@@ -62,7 +62,7 @@ abstract class Action extends Element
         if($this->resource == null)
             return null; //TODO throw exception
 
-        $actionUrl = route('resources.action.form_submit', ['resource' => $this->resource->uri(), 'action' => $this->index])
+        $actionUrl = route('resources.action', ['resource' => $this->resource->uri()])
             . '?' . request()->getQueryString();
 
         $fields = $this->getFields();
@@ -121,6 +121,11 @@ abstract class Action extends Element
             return call_user_func($this->runCallback, $model);
 
         return true;
+    }
+
+    public function index()
+    {
+        return $this->index;
     }
 
 }

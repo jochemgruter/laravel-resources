@@ -41,7 +41,7 @@
                             <ul class="dropdown-menu">
                                 @foreach($actions as $action)
                                     <li>
-                                        <a href="#" class="resource-action" data-resource="{{$resource->name() }}" data-action="{{$action->name()}}">
+                                        <a href="#" class="resource-action" data-resource="{{$resource->name() }}" data-action="{{$action->index()}}">
                                             <div class="fa {{$action->icon}}"></div> &nbsp;&nbsp; {{$action->label()}}
                                         </a>
                                     </li>
@@ -162,100 +162,104 @@
     </nav>
 
      <div class="table-responsive">
-        <table class="table table-th-block table-hover">
+         <form method="post" action="{{route('resources.action', ['resource' => $resource->uri()]).
+               '?'.request()->getQueryString()}}" id="actionForm">
+             @csrf
 
-            <thead>
-            <tr>
-                @if(count($actions) > 0)
-                    <td class="dropdown">
-                        {{--<input type="checkbox" name="" value="">--}}
+             <input type="hidden" name="__action" value="" class="action-attribute">
 
-                        @if($paginator->total() > $models->count())
-
-                            <input type="checkbox"
-                                   role="button" id="dropdownMenuLink" class="resource-model select-all-dummy" data-toggle="dropdown">
-
-                            <div  class="caret"></div>
-
-                            <div class="dropdown-menu with-triangle select-all-menu">
-                                <form class="container" style="width:300px;">
-                                    <div class="form-check p-2">
-                                        <input type="checkbox" class="resource-model" id="selectAll">
-                                        <label for="selectAll">Select all</label>
-                                    </div>
-                                    <div class="form-check p-2">
-                                        <input type="checkbox" name="__allMatching" class="form-check-input action-attribute" id="selectAllMatching"
-                                        {{old('__allMatching') != null ? 'checked' : ''}}>
-                                        <label for="selectAllMatching" class="form-check-label">
-                                            Select all matching ({{$paginator->total()}})
-                                        </label>
-                                    </div>
-                                </form>
-                            </div>
-
-                        @else
-                            <input type="checkbox" id="selectAll">
-                        @endif
-
-                    </td>
-                @endif
-                @foreach($fields as $field)
-                    <th>
-                        @if($field->sortable)
-                            <a href="{{$field->sortUrl()}}">
-                                {{$field->label()}}
-                                <div class="fa fa-sort"></div>
-                            </a>
-                        @else
-                            {{$field->label()}}
-                        @endif
-
-                    </th>
-                @endforeach
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            @foreach($models as $model)
-                <tr class="resource-row" data-id="{{$model->getKey()}}" data-name="{{$model->{$resource::$title} }}">
+            <table class="table table-th-block table-hover">
+                <thead>
+                <tr>
                     @if(count($actions) > 0)
-                        <td>
-                            <input type="checkbox"
-                                   name="__ids[]"
-                                   class="resource-model action-attribute"
-                                   value="{{$model->getKey()}}"
-                                   {{in_array($model->getKey(), old('__ids', [])) ? 'checked' : ''}}>
+                        <td class="dropdown">
+                            @if($paginator->total() > $models->count())
+
+                                <input type="checkbox" role="button" id="dropdownMenuLink"
+                                       class="resource-model select-all-dummy" data-toggle="dropdown">
+
+                                <div  class="caret"></div>
+
+                                <div class="dropdown-menu with-triangle select-all-menu">
+                                    <form class="container" style="width:300px;">
+                                        <div class="form-check p-2">
+                                            <input type="checkbox" class="resource-model" id="selectAll">
+                                            <label for="selectAll">Select all</label>
+                                        </div>
+                                        <div class="form-check p-2">
+                                            <input type="checkbox" name="__allMatching" class="form-check-input action-attribute" id="selectAllMatching"
+                                            {{old('__allMatching') != null ? 'checked' : ''}}>
+                                            <label for="selectAllMatching" class="form-check-label">
+                                                Select all matching ({{$paginator->total()}})
+                                            </label>
+                                        </div>
+                                    </form>
+                                </div>
+
+                            @else
+                                <input type="checkbox" id="selectAll">
+                            @endif
+
                         </td>
                     @endif
                     @foreach($fields as $field)
-                            <td>{!! $field->display($model)  !!}</td>
-                    @endforeach
-                    <td class="actions text-right">
-                        @foreach($actionsInRow as $action)
-                            @if($action->authorizedToRun($model))
-                                <a href="#" class="resource-action single"
-                                   data-model="{{$model->getKey()}}"
-                                   data-action="{{$action->name()}}"
-                                   data-resource="{{$resource->name() }}">
-                                        <div class="fa {{$action->icon}}"></div>&nbsp;
-                                        @if($action->displayOnRowWithLabel)
-                                            {{$action->label()}}
-                                        @endif
+                        <th>
+                            @if($field->sortable)
+                                <a href="{{$field->sortUrl()}}">
+                                    {{$field->label()}}
+                                    <div class="fa fa-sort"></div>
                                 </a>
+                            @else
+                                {{$field->label()}}
                             @endif
-                        @endforeach
 
-                        @if($resource->authorizedToEdit($model))
-                            <a href="{{$resource->route('edit', $model->getKey()) }}"><div class="fa fa-edit"></div></a>
-                        @endif
-                        @if($resource->authorizedToView($model))
-                            <a href="{{$resource->route('show', $model->getKey()) }}"><div class="fa fa-eye"></div></a>
-                        @endif
-                    </td>
+                        </th>
                     @endforeach
+                    <th></th>
                 </tr>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                @foreach($models as $model)
+                    <tr class="resource-row" data-id="{{$model->getKey()}}" data-name="{{$model->{$resource::$title} }}">
+                        @if(count($actions) > 0)
+                            <td>
+                                <input type="checkbox"
+                                       name="__ids[]"
+                                       class="resource-model action-attribute"
+                                       value="{{$model->getKey()}}"
+                                       {{in_array($model->getKey(), old('__ids', [])) ? 'checked' : ''}}>
+                            </td>
+                        @endif
+                        @foreach($fields as $field)
+                                <td>{!! $field->display($model)  !!}</td>
+                        @endforeach
+                        <td class="actions text-right">
+                            @foreach($actionsInRow as $action)
+                                @if($action->authorizedToRun($model))
+                                    <a href="#" class="resource-action single"
+                                       data-model="{{$model->getKey()}}"
+                                       data-action="{{$action->index()}}"
+                                       data-resource="{{$resource->name() }}">
+                                            <div class="fa {{$action->icon}}"></div>&nbsp;
+                                            @if($action->displayOnRowWithLabel)
+                                                {{$action->label()}}
+                                            @endif
+                                    </a>
+                                @endif
+                            @endforeach
+
+                            @if($resource->authorizedToEdit($model))
+                                <a href="{{$resource->route('edit', $model->getKey()) }}"><div class="fa fa-edit"></div></a>
+                            @endif
+                            @if($resource->authorizedToView($model))
+                                <a href="{{$resource->route('show', $model->getKey()) }}"><div class="fa fa-eye"></div></a>
+                            @endif
+                        </td>
+                        @endforeach
+                    </tr>
+                </tbody>
+            </table>
+         </form>
     </div>
 
     <div class="index-bottom">

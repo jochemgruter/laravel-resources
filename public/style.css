@@ -64,6 +64,8 @@
 
 .index-table .select-all-menu{
     position: absolute;
+    width:300px;
+    padding:10px;
 }
 
 .lookup-field .lookup-button{

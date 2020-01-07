@@ -15,10 +15,15 @@ use Illuminate\Http\Request;
 class ActionController
 {
 
-    public function handle(Request $request, $resource, $actionIndex){
+    public function handle(Request $request, $resource){
+
+        $request->validate([
+            '__action' => 'required|numeric',
+            '__ids' => 'required|array',
+        ]);
 
         $resource = Resource::findOrFailFromUri($resource);
-        $action = $resource->getAction($actionIndex);
+        $action = $resource->getAction($request->get('__action'));
 
         if ($action == null)
             abort(404);
@@ -34,7 +39,7 @@ class ActionController
                 return redirect()->back()
                     ->withInput()
                     ->withErrors($validator->errors())
-                    ->with(['actionFailed' => $action->name()]);
+                    ->getSession()->flash('actionFailed', $action->index());
             }
         }
 

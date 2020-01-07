@@ -57,5 +57,4 @@ Route::post(config('resources.route') . '/{resource}/{id}/pivot/{pivot}', 'Resou
     ->name('resource.pivot.assign');
 
 
-Route::post('/action/{resource}/{action}', 'ActionController@handle')->name('resources.action.form_submit');
-Route::post('/action-handler/{resource}/{action}', 'ActionController@handle')->name('resources.action_handler');
+Route::post('/action/{resource}', 'ActionController@handle')->name('resources.action');
