@@ -17,7 +17,7 @@ class Currency extends Field
     use HasDigits;
 
     protected function resolve(Model $model){
-        return '€ '.$model->{$this->attribute};
+        return '€ '.number_format($model->{$this->attribute}, 2, ',', '.');
     }
 
     public function view($attribute, $value)
