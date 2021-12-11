@@ -1,6 +1,6 @@
 # Resource viewer for laravel
 
-Beautiful designed CRUD package. Create your resources and assign Fields, Filters, Relations and Actions. This 
+~~Beautiful~~ designed CRUD package. Create your resources and assign Fields, Filters, Relations and Actions. This 
 package is fully integratable in your own application. Some of the code architecture is inspired by Laravel Nova.   
 
 ## Example code 
@@ -47,4 +47,4 @@ class Users extends Resource
 
 ## In development
 
-Project is currently in heavy development.
+~~Project is currently in development.~~
